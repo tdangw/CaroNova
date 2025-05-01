@@ -4,27 +4,30 @@ const boardSize = 15;
 const board = [];
 let currentPlayer = 'X';
 let gameOver = false;
+let gameMode = 'pve';
 
 const boardElement = document.getElementById('board');
 const statusElement = document.getElementById('status');
 const resetBtn = document.getElementById('reset-btn');
 const timerElement = document.getElementById('timer');
 const turnProgress = document.getElementById('turn-progress-bar');
+const modeSelect = document.getElementById('mode-select');
 
-// Thống kê điểm và lượt
 let playerScore = 0;
 let aiScore = 0;
 let playerWins = 0;
 let aiWins = 0;
 let drawCount = 0;
 
-// Thời gian
 let totalTime = 300;
 let turnTime = 30;
 let totalTimerId = null;
 let turnTimerId = null;
 
-// ==============================================
+modeSelect.addEventListener('change', (e) => {
+  gameMode = e.target.value;
+  createBoard();
+});
 
 function createBoard() {
   boardElement.innerHTML = '';
@@ -45,58 +48,36 @@ function createBoard() {
 
   currentPlayer = 'X';
   gameOver = false;
-  statusElement.textContent = 'Lượt: ❌ Người chơi';
+  updateTurnLabel(true);
   updateTotalTimer();
   resetTimers();
 }
 
-// ==============================================
-
 function handleCellClick(e) {
-  if (gameOver || currentPlayer !== 'X') return;
+  if (gameOver) return;
 
   const row = parseInt(e.target.dataset.row);
   const col = parseInt(e.target.dataset.col);
   if (board[row][col] !== '') return;
 
-  makeMove(row, col, 'X');
+  makeMove(row, col, currentPlayer);
 
-  if (checkWin(row, col, 'X')) {
-    endGame('❌ Người chơi thắng!', 'player');
+  if (checkWin(row, col, currentPlayer)) {
+    const isPlayerWin = currentPlayer === 'X';
+    const winnerText = gameMode === 'pvp' ? (isPlayerWin ? 'Người 1' : 'Người 2') : isPlayerWin ? 'Người chơi' : 'Máy';
+    endGame(`🎉 ${winnerText} thắng!`, isPlayerWin ? 'player' : 'ai');
     return;
   }
 
-  currentPlayer = 'O';
-  statusElement.textContent = 'Lượt: ⭕ Máy';
-  resetTimers();
-
-  const aiThinkTime = Math.floor(Math.random() * 300) + 600;
-
-  setTimeout(() => {
-    if (!gameOver && currentPlayer === 'O') {
-      const [aiRow, aiCol] = getAIMove(board);
-      makeMove(aiRow, aiCol, 'O');
-
-      const index = aiRow * boardSize + aiCol;
-      const cells = boardElement.querySelectorAll('.cell');
-      cells[index].classList.add('ai-move');
-
-      setTimeout(() => {
-        cells[index].classList.remove('ai-move');
-      }, 500);
-
-      if (checkWin(aiRow, aiCol, 'O')) {
-        endGame('⭕ Máy thắng!', 'ai');
-      } else {
-        currentPlayer = 'X';
-        statusElement.textContent = 'Lượt: ❌ Người chơi';
-        resetTimers();
-      }
-    }
-  }, aiThinkTime);
+  if (gameMode === 'pve') {
+    currentPlayer = 'O';
+    updateTurnLabel(false);
+    runAI();
+  } else {
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    updateTurnLabel(currentPlayer === 'X');
+  }
 }
-
-// ==============================================
 
 function makeMove(row, col, player) {
   board[row][col] = player;
@@ -153,17 +134,14 @@ function highlightCells(cells) {
   const allCells = boardElement.querySelectorAll('.cell');
   cells.forEach(([r, c]) => {
     const index = r * boardSize + c;
-    allCells[index].classList.remove('ai-move'); // Gỡ hiệu ứng AI
-
+    allCells[index].classList.remove('ai-move');
     allCells[index].classList.add('win');
   });
 }
 
-// ==============================================
-
 function endGame(message, winner) {
   gameOver = true;
-  statusElement.textContent = `🎉 ${message}`;
+  statusElement.textContent = message;
   clearInterval(totalTimerId);
   clearInterval(turnTimerId);
 
@@ -183,7 +161,12 @@ function endGame(message, winner) {
   saveScoreboard();
 }
 
-// ==============================================
+function updateTurnLabel(isPlayerTurn) {
+  statusElement.textContent =
+    gameMode === 'pvp'
+      ? `Lượt: ${isPlayerTurn ? '❌ Người 1' : '⭕ Người 2'}`
+      : `Lượt: ${isPlayerTurn ? '❌ Người chơi' : '⭕ Máy'}`;
+}
 
 function updateScoreboard() {
   document.getElementById('player-score').textContent = playerScore;
@@ -218,15 +201,13 @@ function loadScoreboard() {
   }
 }
 
-// ==============================================
-
 function resetTimers() {
   clearInterval(turnTimerId);
   clearInterval(totalTimerId);
 
   let turnRemaining = turnTime;
-
   turnProgress.style.width = '100%';
+
   turnTimerId = setInterval(() => {
     turnRemaining--;
     turnProgress.style.width = `${(turnRemaining / turnTime) * 100}%`;
@@ -258,21 +239,57 @@ function updateTotalTimer() {
 function handleTurnTimeout() {
   if (gameOver) return;
 
-  if (currentPlayer === 'X') {
-    endGame('❌ Hết giờ! Thua cuộc!', 'ai');
+  if (gameMode === 'pvp') {
+    endGame('⏱️ Hết giờ!', 'draw');
   } else {
-    endGame('⭕ Hết giờ! ❌ Bạn thắng!', 'player');
+    if (currentPlayer === 'X') {
+      endGame('❌ Hết giờ! Thua cuộc!', 'ai');
+    } else {
+      endGame('⭕ Hết giờ! ❌ Bạn thắng!', 'player');
+    }
   }
 }
 
-// ==============================================
+function runAI() {
+  const aiThinkTime = Math.floor(Math.random() * 300) + 600;
+  resetTimers();
+
+  setTimeout(() => {
+    if (!gameOver && currentPlayer === 'O') {
+      const [aiRow, aiCol] = getAIMove(board);
+      makeMove(aiRow, aiCol, 'O');
+
+      const index = aiRow * boardSize + aiCol;
+      const cells = boardElement.querySelectorAll('.cell');
+      cells[index].classList.add('ai-move');
+
+      setTimeout(() => {
+        if (!cells[index].classList.contains('win')) {
+          cells[index].classList.remove('ai-move');
+        }
+      }, 500);
+
+      if (checkWin(aiRow, aiCol, 'O')) {
+        endGame('⭕ Máy thắng!', 'ai');
+      } else {
+        currentPlayer = 'X';
+        updateTurnLabel(true);
+        resetTimers();
+      }
+    }
+  }, aiThinkTime);
+}
 
 resetBtn.addEventListener('click', () => {
   totalTime = 300;
   createBoard();
 });
-document.getElementById('reset-stats-btn').addEventListener('click', () => {});
-// Tạo popup xác nhận xoá thống kê
+// Gắn sự kiện nút reset thống kê
+document.getElementById('reset-stats-btn')?.addEventListener('click', () => {
+  document.getElementById('confirm-overlay')?.classList.remove('hidden');
+});
+
+// Tạo popup xác nhận nếu chưa có
 function createConfirmPopup() {
   const confirmOverlay = document.createElement('div');
   confirmOverlay.id = 'confirm-overlay';
@@ -287,19 +304,12 @@ function createConfirmPopup() {
     </div>
   `;
   document.body.appendChild(confirmOverlay);
-}
 
-const resetStatsBtn = document.getElementById('reset-stats-btn');
+  document.getElementById('confirm-no').addEventListener('click', () => {
+    confirmOverlay.classList.add('hidden');
+  });
 
-resetStatsBtn.addEventListener('click', () => {
-  document.getElementById('confirm-overlay')?.classList.remove('hidden');
-});
-
-document.addEventListener('click', (e) => {
-  if (e.target.id === 'confirm-no') {
-    document.getElementById('confirm-overlay').classList.add('hidden');
-  }
-  if (e.target.id === 'confirm-yes') {
+  document.getElementById('confirm-yes').addEventListener('click', () => {
     playerScore = 0;
     aiScore = 0;
     playerWins = 0;
@@ -307,10 +317,11 @@ document.addEventListener('click', (e) => {
     drawCount = 0;
     updateScoreboard();
     saveScoreboard();
-    document.getElementById('confirm-overlay').classList.add('hidden');
-  }
-});
+    confirmOverlay.classList.add('hidden');
+  });
+}
 
 createConfirmPopup();
+
 createBoard();
 loadScoreboard();
