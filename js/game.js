@@ -11,10 +11,20 @@ const resetBtn = document.getElementById('reset-btn');
 const timerElement = document.getElementById('timer');
 const turnProgress = document.getElementById('turn-progress-bar');
 
-let totalTime = 300; // 5 phút
-let turnTime = 30; // 30s mỗi lượt
+// Thống kê điểm và lượt
+let playerScore = 0;
+let aiScore = 0;
+let playerWins = 0;
+let aiWins = 0;
+let drawCount = 0;
+
+// Thời gian
+let totalTime = 300;
+let turnTime = 30;
 let totalTimerId = null;
 let turnTimerId = null;
+
+// ==============================================
 
 function createBoard() {
   boardElement.innerHTML = '';
@@ -40,18 +50,19 @@ function createBoard() {
   resetTimers();
 }
 
+// ==============================================
+
 function handleCellClick(e) {
   if (gameOver || currentPlayer !== 'X') return;
 
   const row = parseInt(e.target.dataset.row);
   const col = parseInt(e.target.dataset.col);
-
   if (board[row][col] !== '') return;
 
   makeMove(row, col, 'X');
 
   if (checkWin(row, col, 'X')) {
-    endGame('❌ Người chơi thắng!');
+    endGame('❌ Người chơi thắng!', 'player');
     return;
   }
 
@@ -59,7 +70,7 @@ function handleCellClick(e) {
   statusElement.textContent = 'Lượt: ⭕ Máy';
   resetTimers();
 
-  const aiThinkTime = Math.floor(Math.random() * 300) + 600; // 300ms – 900ms
+  const aiThinkTime = Math.floor(Math.random() * 300) + 600;
 
   setTimeout(() => {
     if (!gameOver && currentPlayer === 'O') {
@@ -75,7 +86,7 @@ function handleCellClick(e) {
       }, 500);
 
       if (checkWin(aiRow, aiCol, 'O')) {
-        endGame('⭕ Máy thắng!');
+        endGame('⭕ Máy thắng!', 'ai');
       } else {
         currentPlayer = 'X';
         statusElement.textContent = 'Lượt: ❌ Người chơi';
@@ -84,6 +95,8 @@ function handleCellClick(e) {
     }
   }, aiThinkTime);
 }
+
+// ==============================================
 
 function makeMove(row, col, player) {
   board[row][col] = player;
@@ -140,16 +153,72 @@ function highlightCells(cells) {
   const allCells = boardElement.querySelectorAll('.cell');
   cells.forEach(([r, c]) => {
     const index = r * boardSize + c;
+    allCells[index].classList.remove('ai-move'); // Gỡ hiệu ứng AI
+
     allCells[index].classList.add('win');
   });
 }
 
-function endGame(msg) {
+// ==============================================
+
+function endGame(message, winner) {
   gameOver = true;
-  statusElement.textContent = `🎉 ${msg}`;
+  statusElement.textContent = `🎉 ${message}`;
   clearInterval(totalTimerId);
   clearInterval(turnTimerId);
+
+  if (winner === 'player') {
+    playerWins++;
+    playerScore += 100;
+  } else if (winner === 'ai') {
+    aiWins++;
+    aiScore += 100;
+  } else {
+    drawCount++;
+    playerScore += 50;
+    aiScore += 50;
+  }
+
+  updateScoreboard();
+  saveScoreboard();
 }
+
+// ==============================================
+
+function updateScoreboard() {
+  document.getElementById('player-score').textContent = playerScore;
+  document.getElementById('ai-score').textContent = aiScore;
+  document.getElementById('player-wins').textContent = playerWins;
+  document.getElementById('ai-wins').textContent = aiWins;
+  document.getElementById('draw-count').textContent = drawCount;
+}
+
+function saveScoreboard() {
+  localStorage.setItem(
+    'caro-scoreboard',
+    JSON.stringify({
+      playerScore,
+      aiScore,
+      playerWins,
+      aiWins,
+      drawCount,
+    })
+  );
+}
+
+function loadScoreboard() {
+  const saved = JSON.parse(localStorage.getItem('caro-scoreboard'));
+  if (saved) {
+    playerScore = saved.playerScore || 0;
+    aiScore = saved.aiScore || 0;
+    playerWins = saved.playerWins || 0;
+    aiWins = saved.aiWins || 0;
+    drawCount = saved.drawCount || 0;
+    updateScoreboard();
+  }
+}
+
+// ==============================================
 
 function resetTimers() {
   clearInterval(turnTimerId);
@@ -175,7 +244,7 @@ function resetTimers() {
     if (totalTime <= 0) {
       clearInterval(totalTimerId);
       clearInterval(turnTimerId);
-      endGame('⏱️ Hết giờ!');
+      endGame('⏱️ Hết giờ!', 'draw');
     }
   }, 1000);
 }
@@ -190,15 +259,58 @@ function handleTurnTimeout() {
   if (gameOver) return;
 
   if (currentPlayer === 'X') {
-    endGame('❌ Hết giờ! Thua cuộc!');
+    endGame('❌ Hết giờ! Thua cuộc!', 'ai');
   } else {
-    endGame('⭕ Hết giờ! ❌ Bạn thắng!');
+    endGame('⭕ Hết giờ! ❌ Bạn thắng!', 'player');
   }
 }
+
+// ==============================================
 
 resetBtn.addEventListener('click', () => {
   totalTime = 300;
   createBoard();
 });
+document.getElementById('reset-stats-btn').addEventListener('click', () => {});
+// Tạo popup xác nhận xoá thống kê
+function createConfirmPopup() {
+  const confirmOverlay = document.createElement('div');
+  confirmOverlay.id = 'confirm-overlay';
+  confirmOverlay.className = 'overlay hidden';
+  confirmOverlay.innerHTML = `
+    <div class="confirm-box">
+      <p>Bạn có chắc muốn xóa toàn bộ điểm và thống kê?</p>
+      <div class="confirm-actions">
+        <button id="confirm-yes">✅ Đồng ý</button>
+        <button id="confirm-no">❌ Hủy</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmOverlay);
+}
 
+const resetStatsBtn = document.getElementById('reset-stats-btn');
+
+resetStatsBtn.addEventListener('click', () => {
+  document.getElementById('confirm-overlay')?.classList.remove('hidden');
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'confirm-no') {
+    document.getElementById('confirm-overlay').classList.add('hidden');
+  }
+  if (e.target.id === 'confirm-yes') {
+    playerScore = 0;
+    aiScore = 0;
+    playerWins = 0;
+    aiWins = 0;
+    drawCount = 0;
+    updateScoreboard();
+    saveScoreboard();
+    document.getElementById('confirm-overlay').classList.add('hidden');
+  }
+});
+
+createConfirmPopup();
 createBoard();
+loadScoreboard();

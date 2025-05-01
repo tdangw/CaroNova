@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CaroNova - Chơi với AI</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.mobile.css" media="(max-width: 480px)">  
 </head>
 <body>
   <div id="game-container">
@@ -14,8 +15,13 @@
     <!-- Header bên trên bàn cờ -->
     <div class="board-controls">
       <button id="reset-btn">🔄 Chơi lại</button>
+      <button id="reset-stats-btn">🧹 Reset thống kê</button>
       <div id="timer">⏱️ 00:00</div>
       <div id="status">Lượt: ❌ Người chơi</div>
+      <div id="scoreboard">
+        🧮 Điểm: <span id="player-score">0</span> | AI: <span id="ai-score">0</span><br>
+        🏆 Thắng: <span id="player-wins">0</span> | ❌ Thua: <span id="ai-wins">0</span> | 🤝 Hòa: <span id="draw-count">0</span>
+      </div>      
     </div>
     
     <!-- Đặt riêng dưới .board-controls -->
@@ -24,7 +30,7 @@
     </div>
     
     <!-- Phiên bản đặt độc lập cuối -->
-    <div id="game-version" title="Phiên bản: CaroNova v1.0">ℹ️v1.0</div>    
+    <div id="game-version" title="Phiên bản: CaroNova v1.0">ℹ️ v1.0</div>    
     <!-- Bàn cờ -->
     <div id="board" class="board"></div>
     

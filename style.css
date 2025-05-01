@@ -1,10 +1,4 @@
-/* Reset cơ bản */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ========== GLOBAL ========== */
 body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
@@ -16,46 +10,47 @@ body {
   margin: 0;
 }
 
+/* ========== GAME CONTAINER ========== */
 #game-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 700px;
-  width: 100%;
-  padding: 10px 20px; /* giảm padding top */
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-  gap: 12px; /* giảm khoảng cách giữa các khối */
+  gap: 12px;
 }
 
+/* ========== HEADER & CONTROLS ========== */
 .glow-title {
-  font-size: 2em; /* giảm kích thước */
-  margin: 10px 0 5px; /* thu gọn khoảng cách */
+  font-size: 2em;
   text-shadow: 0 0 6px #ffffff, 0 0 12px #00f0ff;
+  margin: 0;
 }
 
-#status {
-  margin: 4px 0 8px; /* thu gọn status */
-  font-size: 1.1em;
-  text-shadow: 0 0 4px #ffeb3b;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(15, 40px);
-  grid-template-rows: repeat(15, 40px);
-  border: 2px solid #ffffff33;
-}
 .board-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   max-width: 600px;
-  margin-bottom: 10px;
-  padding: 0 5px;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+#reset-btn {
+  padding: 8px 16px;
+  background: #ffffff22;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.2s;
+}
+
+#reset-btn:hover {
+  background: #ffffff44;
 }
 
 #timer {
@@ -66,97 +61,80 @@ body {
   text-shadow: 0 0 4px #00e6e6;
 }
 
-/* Ô cờ */
+#status {
+  font-size: 1em;
+  min-width: 130px;
+  text-align: right;
+  color: #ffeeaa;
+  text-shadow: 0 0 4px #ffeb3b;
+}
+
+/* ========== BOARD ========== */
+#board {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  aspect-ratio: 1 / 1;
+  max-width: 90vmin;
+  width: 100%;
+  margin: 0 auto;
+  gap: 1px;
+}
+
 .cell {
-  width: 40px;
-  height: 40px;
-  font-size: 1.4em;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  font-size: 1.4em;
   border: 1px solid #ffffff22;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
   user-select: none;
-  transition: background 0.2s, transform 0.1s;
+  aspect-ratio: 1 / 1;
 }
 
-/* Nút */
-#reset-btn {
-  margin-top: 5px;
-  margin-bottom: 10px;
-  padding: 10px 20px;
-  background: #ffffff22;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background 0.2s;
-}
-
-#reset-btn:hover {
-  background: #ffffff44;
-}
-
-.cell:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: scale(1.05);
-}
-
-/* Quân X/O */
 .cell.X {
   color: #ff6b6b;
-  text-shadow: 0 0 10px #ff6b6b;
 }
 
 .cell.O {
-  color: #4fc3f7;
-  text-shadow: 0 0 10px #4fc3f7;
+  color: #4ecdc4;
 }
 
 .cell.win {
-  animation: win-glow 0.8s infinite alternate;
+  background-color: rgba(255, 255, 0, 0.2);
+  box-shadow: 0 0 8px 2px rgba(255, 255, 0, 0.4);
+  animation: winPulse 0.8s ease-in-out infinite alternate;
 }
 
-@keyframes win-glow {
+@keyframes winPulse {
   0% {
-    box-shadow: 0 0 5px #fff5c3, 0 0 10px #ffd700;
-    transform: scale(1.05);
+    transform: scale(1);
+    opacity: 1;
   }
   100% {
-    box-shadow: 0 0 15px #fff59d, 0 0 30px #ffeb3b;
-    transform: scale(1.1);
+    transform: scale(1.05);
+    opacity: 0.8;
   }
 }
-#status {
-  position: relative;
-  font-size: 1em;
-  color: #ffeeaa;
-  text-shadow: 0 0 4px #ffeb3b;
-  min-width: fit-content;
+
+/* Hiệu ứng khi AI đánh */
+.cell.O.ai-move {
+  color: #00ffff;
+  box-shadow: 0 0 12px #00ffff;
+  transform: scale(1.2);
+  font-weight: bold;
+  background-color: rgba(0, 255, 255, 0.05);
+  transition: all 0.2s ease;
 }
 
-/* giữ layout không đổi bằng ::after */
-#status::after {
-  content: 'Lượt: ⭕ Người chơi';
-  visibility: hidden;
-  display: block;
-  height: 0;
-  overflow: hidden;
-}
-.cell.O.ai-move {
-  text-shadow: 0 0 6px #66ccff, 0 0 12px #66ccff;
-  filter: brightness(1.4);
-  transition: all 0.3s ease-in-out;
-}
+/* ========== PROGRESS BAR ========== */
 #turn-progress-wrapper {
   width: 100%;
-  max-width: 100px;
+  max-width: 600px;
   height: 6px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 10px;
 }
 
 #turn-progress-bar {
@@ -165,6 +143,8 @@ body {
   background: linear-gradient(to right, #00e6e6, #00bfff);
   transition: width 1s linear;
 }
+
+/* ========== VERSION ========== */
 #game-version {
   position: fixed;
   bottom: 10px;
@@ -172,9 +152,71 @@ body {
   font-size: 0.8em;
   color: #ffffff66;
   text-shadow: 0 0 3px #000;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  padding: 5px 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   z-index: 1000;
+  pointer-events: auto;
+}
+/* ========== SCOREBOARD ========== */
+#reset-stats-btn {
+  padding: 6px 14px;
+  background: #ff888855;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#reset-stats-btn:hover {
+  background: #ff8888aa;
+}
+/* Popup Xóa */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.confirm-box {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 0 10px #00ffff;
+}
+
+.confirm-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirm-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#confirm-yes {
+  background-color: #00aa88;
+  color: white;
+}
+#confirm-no {
+  background-color: #aa3333;
+  color: white;
+}
+
+.hidden {
+  display: none;
 }
