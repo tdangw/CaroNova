@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CaroNova - Chơi với AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <!-- Logo game -->
+    <h1 class="glow-title">🌟 CaroNova</h1>
+
+    <!-- Header bên trên bàn cờ -->
+    <div class="board-controls">
+      <button id="reset-btn">🔄 Chơi lại</button>
+      <div id="timer">⏱️ 00:00</div>
+      <div id="status">Lượt: ❌ Người chơi</div>
+      <div id="turn-progress-wrapper">
+        <div id="turn-progress-bar"></div>
+      </div>
+      
+    </div>
+
+    <!-- Bàn cờ -->
+    <div id="board" class="board"></div>
+  </div>
+
+  <script type="module" src="./js/game.js"></script>
+</body>
+</html>

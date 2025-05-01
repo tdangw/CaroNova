@@ -1,0 +1,167 @@
+/* Reset cơ bản */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 700px;
+  width: 100%;
+  padding: 10px 20px; /* giảm padding top */
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+  gap: 12px; /* giảm khoảng cách giữa các khối */
+}
+
+.glow-title {
+  font-size: 2em; /* giảm kích thước */
+  margin: 10px 0 5px; /* thu gọn khoảng cách */
+  text-shadow: 0 0 6px #ffffff, 0 0 12px #00f0ff;
+}
+
+#status {
+  margin: 4px 0 8px; /* thu gọn status */
+  font-size: 1.1em;
+  text-shadow: 0 0 4px #ffeb3b;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(15, 40px);
+  grid-template-rows: repeat(15, 40px);
+  border: 2px solid #ffffff33;
+}
+.board-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 10px;
+  padding: 0 5px;
+  gap: 10px;
+}
+
+#timer {
+  font-size: 1em;
+  min-width: 80px;
+  text-align: center;
+  color: #aaffee;
+  text-shadow: 0 0 4px #00e6e6;
+}
+
+/* Ô cờ */
+.cell {
+  width: 40px;
+  height: 40px;
+  font-size: 1.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ffffff22;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s, transform 0.1s;
+}
+
+/* Nút */
+#reset-btn {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  padding: 10px 20px;
+  background: #ffffff22;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.2s;
+}
+
+#reset-btn:hover {
+  background: #ffffff44;
+}
+
+.cell:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: scale(1.05);
+}
+
+/* Quân X/O */
+.cell.X {
+  color: #ff6b6b;
+  text-shadow: 0 0 10px #ff6b6b;
+}
+
+.cell.O {
+  color: #4fc3f7;
+  text-shadow: 0 0 10px #4fc3f7;
+}
+
+.cell.win {
+  animation: win-glow 0.8s infinite alternate;
+}
+
+@keyframes win-glow {
+  0% {
+    box-shadow: 0 0 5px #fff5c3, 0 0 10px #ffd700;
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 15px #fff59d, 0 0 30px #ffeb3b;
+    transform: scale(1.1);
+  }
+}
+#status {
+  position: relative;
+  font-size: 1em;
+  color: #ffeeaa;
+  text-shadow: 0 0 4px #ffeb3b;
+  min-width: fit-content;
+}
+
+/* giữ layout không đổi bằng ::after */
+#status::after {
+  content: 'Lượt: ⭕ Người chơi';
+  visibility: hidden;
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+.cell.O.ai-move {
+  text-shadow: 0 0 6px #66ccff, 0 0 12px #66ccff;
+  filter: brightness(1.4);
+  transition: all 0.3s ease-in-out;
+}
+#turn-progress-wrapper {
+  width: 100%;
+  max-width: 100px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+#turn-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right, #00e6e6, #00bfff);
+  transition: width 1s linear;
+}
