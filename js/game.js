@@ -59,7 +59,7 @@ function handleCellClick(e) {
   statusElement.textContent = 'Lượt: ⭕ Máy';
   resetTimers();
 
-  const aiThinkTime = Math.floor(Math.random() * 1000) + 300; // 300ms – 1s
+  const aiThinkTime = Math.floor(Math.random() * 300) + 600; // 300ms – 900ms
 
   setTimeout(() => {
     if (!gameOver && currentPlayer === 'O') {
