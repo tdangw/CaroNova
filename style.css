@@ -63,10 +63,12 @@ body {
 
 #status {
   font-size: 1em;
-  min-width: 130px;
-  text-align: right;
   color: #ffeeaa;
   text-shadow: 0 0 4px #ffeb3b;
+  min-width: 160px; /* hoặc auto tính theo max nội dung */
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* ========== BOARD ========== */
